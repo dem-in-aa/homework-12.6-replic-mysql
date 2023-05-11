@@ -30,9 +30,25 @@ https://dev.mysql.com/downloads/
 ```
 Загрузка пакета:
 ```cd /tmp
-wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.20-1_all.deb
+wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.25-1_all.deb
 ls -fla | grep mysql
 ```
+Установим пакет:
+```
+dpkg -i mysql-apt-config_0.8.25-1_all.deb
+```
+После установки пакета в /etc/apt/source.list.d/ добавится mysql.list.
+Обновляем репозиторий:
+```
+apt-get update
+```
+<ins>2.Установка MySQL 8</ins>
+```
+apt-get install mysql-server
+```
+
+
+
 ---
 
 ## Дополнительные задания (со звёздочкой*)
