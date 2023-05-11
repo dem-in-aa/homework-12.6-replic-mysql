@@ -18,6 +18,21 @@
 
 *Приложите скриншоты конфигурации, выполнения работы: состояния и режимы работы серверов.*
 
+<ins>1.Установка репозитория MySQL 8</ins>
+
+Предварительно нужно установить пакет gnupg.
+```
+apt-get install gnupg
+```
+Установка MySQL APT репозитория:
+```
+https://dev.mysql.com/downloads/
+```
+Загрузка пакета:
+```cd /tmp
+wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.20-1_all.deb
+ls -fla | grep mysql
+```
 ---
 
 ## Дополнительные задания (со звёздочкой*)
