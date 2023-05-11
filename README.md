@@ -89,7 +89,31 @@ cd /opt
 mkdir mysql
 ls -Fla
 ```
-
+Проверим где находится текущая БД MySQL.
+```
+mysql -u root -p
+select @@datadir;
+```
+Останавливаем сервер MySQL:
+```
+systemctl stop mysql
+```
+Проверяем статус, мы должны убедиться, что сервер MySQL остановлен:
+```
+systemctl status mysql
+```
+С помощью rsync переносим MySQL в другую папку:
+```
+rsync -av /var/lib/mysql /opt/mysql
+```
+Переименуем старую папку /var/lib/mysql, сохраним её на случай сбоя:
+```
+mv /var/lib/mysql /var/lib/mysql.bak
+```
+По умолчанию путь настроен в файле /etc/mysql/mysql.conf.d/mysqld.cnf, редактируем:
+```
+nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
 
 
 
