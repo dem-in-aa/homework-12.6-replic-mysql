@@ -114,9 +114,24 @@ mv /var/lib/mysql /var/lib/mysql.bak
 ```
 nano /etc/mysql/mysql.conf.d/mysqld.cnf
 ```
-
-
-
+В строке datadir= указать путь к новому каталогу данных /opt/mysql/mysql
+```
+datadir =  /opt/mysql/mysql
+```
+MySQL при запуске проверяет наличие директории /var/lib/mysql/mysql . Чтобы он не ругался, создадим пустую папку:
+```
+mkdir /var/lib/mysql/mysql -p
+```
+Запускаем MySQL:
+```
+systemctl start mysql
+systemctl status mysql
+```
+Проверяем текущий путь:
+```
+mysql -u root -p
+select @@datadir;
+```
 ---
 
 ## Дополнительные задания (со звёздочкой*)
