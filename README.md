@@ -132,6 +132,13 @@ systemctl status mysql
 mysql -u root -p
 select @@datadir;
 ```
+<ins>5.Настройка Master-node</ins>
+
+Создадим учетную запись Master для сервера репликации:
+```sql
+CREATE USER 'replication'@'%';
+GRANT REPLICATION SLAVE ON *.* TO 'replication'@'%';
+```
 ---
 
 ## Дополнительные задания (со звёздочкой*)
