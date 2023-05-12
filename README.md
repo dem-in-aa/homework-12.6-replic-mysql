@@ -18,6 +18,10 @@
 
 *Приложите скриншоты конфигурации, выполнения работы: состояния и режимы работы серверов.*
 
+Для выполнения задачи подготовлена ВМ на базе Debian 11:
+
+![](img/2-0-1.png)
+
 <ins>1.Установка репозитория MySQL 8</ins>
 
 Предварительно нужно установить пакет gnupg.
@@ -33,11 +37,16 @@ https://dev.mysql.com/downloads/
 wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.25-1_all.deb
 ls -fla | grep mysql
 ```
+![](img/2-1.png)
+
 Установим пакет:
 ```
 dpkg -i mysql-apt-config_0.8.25-1_all.deb
 ```
 После установки пакета в /etc/apt/source.list.d/ добавится mysql.list.
+
+![](img/2-2.png)
+
 Обновляем репозиторий:
 ```
 apt-get update
@@ -46,6 +55,8 @@ apt-get update
 ```
 apt-get install mysql-server
 ```
+![](img/2-3.png)
+
 <ins>3.Настройка безопасности</ins>
 
 Для настройки безопасного доступа к MySQL существует специальный скрипт:
@@ -70,6 +81,8 @@ mysql_secure_installation
 ```
 systemctl status mysql
 ```
+![](img/2-4.png)
+
 Проверка на автозагрузку:
 ```
 systemctl is-enabled mysql
@@ -94,6 +107,8 @@ ls -Fla
 mysql -u root -p
 select @@datadir;
 ```
+![](img/2-5.png)
+
 Останавливаем сервер MySQL:
 ```
 systemctl stop mysql
@@ -102,7 +117,9 @@ systemctl stop mysql
 ```
 systemctl status mysql
 ```
-С помощью rsync переносим MySQL в другую папку:
+![](img/2-6.png)
+
+С помощью rsync (предварительно установить) переносим MySQL в другую папку:
 ```
 rsync -av /var/lib/mysql /opt/mysql
 ```
@@ -132,13 +149,130 @@ systemctl status mysql
 mysql -u root -p
 select @@datadir;
 ```
+![](img/2-7.png)
+
 <ins>5.Настройка Master-node</ins>
 
-Создадим учетную запись Master для сервера репликации:
-```sql
-CREATE USER 'replication'@'%';
-GRANT REPLICATION SLAVE ON *.* TO 'replication'@'%';
+Настроим конфигурацию:
 ```
+nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+```
+[mysqld]
+pid-file        = /var/run/mysqld/mysqld.pid
+socket          = /var/run/mysqld/mysqld.sock
+datadir         = /opt/mysql/mysql
+log-error       = /var/log/mysql/error.log
+
+server-id = 1
+log-bin = /var/log/mysql/mysql-bin.log
+tmpdir = /tmp
+binlog_format = ROW
+max_binlog_size = 500M
+sync_binlog = 1
+expire-logs-days = 7
+slow_query_log
+```
+![](img/2-9-1.png)
+
+
+Перезапускаем сервис:
+```
+systemctl restart mysql
+```
+Создадим учетную запись Master для сервера репликации и предоставим права:
+```sql
+CREATE USER rep_user@192.168.0.18 IDENTIFIED BY 'password';
+alter user rep_user@192.168.0.18 identified with mysql_native_password by 'password';
+grant replication slave on *.* to rep_user@192.168.0.18;
+```
+![](img/2-10.png)
+
+Статус привилегий:
+```sql
+show grants for rep_user@192.168.0.18;
+```
+![](img/2-11.png)
+
+Проверка статуса Master-node:
+```sql
+show master status\G
+```
+![](img/2-8.png)
+
+<ins>6.Настройка Slave-node</ins>
+
+Настроим конфигурацию:
+```
+nano /etc/mysql/mysql.conf.d/mysqld.cnf
+```
+```
+[mysqld]
+pid-file        = /var/run/mysqld/mysqld.pid
+socket          = /var/run/mysqld/mysqld.sock
+datadir         = /opt/mysql/mysql
+log-error       = /var/log/mysql/error.log
+
+log_bin = /var/log/mysql/mysql-bin.log
+server-id = 2
+read_only = 1
+tmpdir = /tmp
+binlog_format = ROW
+max_binlog_size = 500M
+sync_binlog = 1
+expire-logs-days = 7
+slow_query_log   = 1
+```
+![](img/2-9-2.png)
+
+Перезапускаем сервис:
+```
+systemctl restart mysql
+```
+Инициализация процесса репликации:
+```sql
+CHANGE MASTER TO MASTER_HOST='192.168.0.16',
+-> MASTER_USER='rep_user',
+-> MASTER_PASSWORD='password',
+-> MASTER_LOG_FILE='mysql-bin.000002',
+-> MASTER_LOG_POS=157;
+```
+![](img/2-12.png)
+
+Запуск репликации:
+```sql
+start slave;
+```
+Статус Slave-node:
+```sql
+show slave status\G
+```
+![](img/2-13.png)
+![](img/2-14.png)
+
+<ins>7.Тестирование</ins>
+
+Смотрим БД на Master & Slave:
+```sql
+show databases;
+```
+
+![](img/2-15.png)
+---
+![](img/2-16.png)
+
+Создаем БД на Master-node:
+```sql
+create database test1
+```
+![](img/2-17.png)
+
+Проверяем репликацию БД на Slave-node:
+```sql
+show databases;
+```
+![](img/2-18.png)
+
 ---
 
 ## Дополнительные задания (со звёздочкой*)
