@@ -231,11 +231,7 @@ systemctl restart mysql
 ```
 Инициализация процесса репликации:
 ```sql
-CHANGE MASTER TO MASTER_HOST='192.168.0.16',
--> MASTER_USER='rep_user',
--> MASTER_PASSWORD='password',
--> MASTER_LOG_FILE='mysql-bin.000002',
--> MASTER_LOG_POS=157;
+CHANGE MASTER TO MASTER_HOST='192.168.0.16', MASTER_USER='rep_user', MASTER_PASSWORD='password', MASTER_LOG_FILE='mysql-bin.000002', MASTER_LOG_POS=157;
 ```
 ![](img/2-12.png)
 
