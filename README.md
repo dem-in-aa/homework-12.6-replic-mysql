@@ -185,6 +185,7 @@ systemctl restart mysql
 CREATE USER rep_user@192.168.0.18 IDENTIFIED BY 'password';
 alter user rep_user@192.168.0.18 identified with mysql_native_password by 'password';
 grant replication slave on *.* to rep_user@192.168.0.18;
+FLUSH PRIVILEGES;
 ```
 ![](img/2-10.png)
 
